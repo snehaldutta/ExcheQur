@@ -1,14 +1,20 @@
-from django.shortcuts import render
+from django.shortcuts import redirect, render
 from django.contrib import messages
 from .models import ExpensesTracker, DailyBudgetLimit
 from django.db.models import Sum
 import json
 from decimal import Decimal
 import os 
-
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render, redirect
+from django.contrib.auth import login, logout
+from django.contrib.auth.forms import UserCreationForm
+from django.urls import reverse
 def index(request):
     return render(request, 'finances/index.html')
+
 # Function to handle submitting new expenses
+@login_required
 def submitEntry(request):
     if request.method == 'POST':
         print(request.POST)  # For debugging
@@ -92,6 +98,7 @@ class DecimalEncoder(json.JSONEncoder):
 
 
 # Function to fetch and return data for graphs
+@login_required
 def graphs_expenses(request):
     data = ExpensesTracker.objects.values('category').annotate(totalValue=Sum('amount')).order_by('-totalValue')
     labels = [item['category'] for item in data]
@@ -104,3 +111,18 @@ def graphs_expenses(request):
     }
 
     return render(request, 'finances/dashboard.html', contents)
+
+def register(request):
+    if request.method == "POST":
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)
+            return redirect(reverse('index'))
+    else:
+        form = UserCreationForm()
+    return render(request, 'registration/register.html', {'form': form})
+
+def logout_view(request):
+    logout(request)
+    return redirect(reverse('index'))
