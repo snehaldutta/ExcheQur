@@ -22,7 +22,9 @@ py manage.py runserver
 
 Once the server is running, you will see the project URL in the terminal.
 In order to see the all whole working of the app, please login to the given credentials
+
 **Username :** steveJobs
+
 **Password :** Newton@2023
 
 ---
